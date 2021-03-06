@@ -12,4 +12,4 @@ function fib_even_sum(max){
   return even_sum;
 }
 
-console.log("Sum of even Fibonacci numbers which don't exceed 4 million:",fib_even_sum(4000000))
+console.log("Sum of even Fibonacci numbers which don't exceed 4 million:",fib_even_sum(4000000));
