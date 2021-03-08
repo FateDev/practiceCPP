@@ -13,9 +13,7 @@ function find_divisors(num){
 }
 
 function triangle_num(n){
-  let num = 0;
-  for(let i = 1; i <= n; i++) num += i;
-  return num;
+  return (Math.pow(n, 2)+n)/2;
 }
 
 function highly_divisible_triangular_number(){
