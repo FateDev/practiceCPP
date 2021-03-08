@@ -23,4 +23,10 @@ function paths_lattice(n){
 	return find_value(n, n);
 }
 
+//Also since you can write the moves to traverse the grid as R and D, and there will always be 40 moves
+//so you can arrange in 40! ways, but there are 10! ways to arrange the 20 different Rs that will be there, same for Ds
+//so you divide by those: 40!/20!20! -> 40C20
+
+//Or you rotate Pascal's triangle by 45deg and look at the diagonal
+
 console.log("The number of routes when going just left or right through a 20x20 lattice to the bottom left from the top left is:",paths_lattice(20));
