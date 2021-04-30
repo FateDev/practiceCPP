@@ -36,20 +36,38 @@ function gen_letter_combos(p, q, r, parent_letter_num, parent_letter_num_reps){
 
 function traverse(p, q, r, target){
     let letters = Array.from(Array(p)).map((item, idx) => String.fromCharCode(idx + 65))
+
+    let combos = [];
+    for(let i = 1; i <= q; i++)
+        combos[i] = p**i
+    for(let i = q+1; i <= r; i++){
+        let local_sum = 0;
+        for(let j = q; j > 0; j--)
+            local_sum += (p-1)/p * combos[i - j];
+        combos[i] = local_sum * p
+    }
+
+    combos.shift()
+    combos.push(undefined)
+    combos = combos.reverse()
+    console.log(combos)
+
     let current = 0;
+    let layers = [];
     let str = ""
-    for(let i = 0; i < r; i++){
-        let combos = count_combos(p, q, r-i)
-        let interval_num = select_interval(combos, combos/p, target) - 1
-        current += combos
+    for(let i = 1; i <= r; i++){
+        let combos_this_layer = combos[i]
+        let interval_num = select_interval(combos_this_layer, combos_this_layer/p, target, current) - 1
+        console.log(combos_this_layer, interval_num, current)
+        current += combos_this_layer/p * interval_num
         str += letters[interval_num]
     }
     return str 
 }
 
-function select_interval(interval_size, sub_interval_size, target){
+function select_interval(interval_size, sub_interval_size, target, offset){
     let intervals = interval_size / sub_interval_size;
     for(let i = 0; i < intervals; i++){
-        if(i * sub_interval_size < target && target <= (i+1) * sub_interval_size) return i+1
+        if(i * sub_interval_size + offset < target && target <= (i+1) * sub_interval_size + offset) return i+1
     }
 }
