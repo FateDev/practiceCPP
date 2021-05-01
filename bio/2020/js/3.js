@@ -131,6 +131,17 @@ function traverse_possibility_graph(p, q, r, target){
     return str
 }
 
+function fit_idx(value, fit_array, offset){
+    value -= offset;
+    let sum = 0;
+    for(let i = 0; i < fit_array.length; i++){
+        if(value - fit_array[i] - sum < 0)
+            return [ i, sum ];
+        sum += fit_array[i]
+    }
+    throw "No fit found"
+}
+
 function run_3a(){
     const [p, q, r] = prompt("Please enter space separated values for p, q and r", "2 2 4").split(" ").map(letter => parseInt(letter))
     const path_num = prompt("Enter the path number please", "7")
