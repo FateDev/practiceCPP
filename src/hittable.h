@@ -3,9 +3,12 @@
 
 #include "ray.h"
 
+class material;
+
 struct hit_record {
     point3 p{}; // point at which hit happened
     double t{}; // value on dir vector line at which hit occurred
+    shared_ptr<material> mat_ptr{};
 
     bool front_face{};
     vec3 normal{}; // normal at hit

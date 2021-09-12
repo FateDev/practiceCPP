@@ -59,6 +59,11 @@ public:
     inline static vec3 random(double min, double max){
         return { random_double(min, max), random_double(min, max), random_double(min, max) };
     }
+
+    bool near_zero() const{
+        const auto s = 1e-8; // threshold to be considered near zero
+        return (fabs(vec[0]) < s) && (fabs(vec[1]) < s) && (fabs(vec[2]) < s); // return true if close to zero
+    }
 };
 
 inline std::ostream &operator<<(std::ostream &out, const vec3 &u){
@@ -97,6 +102,11 @@ inline vec3 cross(const vec3 &u, const vec3 &v){
     };
 }
 
+inline vec3 operator*(const vec3 &u, const vec3 &v){
+    return { u.vec[0]*v.vec[0], u.vec[1]*v.vec[1], u.vec[2]*v.vec[2] };
+    // Hadamard product - element wise multiplication
+}
+
 inline vec3 unit_vector(const vec3 &u){
     return u/u.length();
 }
@@ -124,6 +134,12 @@ inline vec3 random_in_hemisphere(const vec3 &normal){
     }else{
         return -point_in_unit_sphere;
     }
+}
+
+inline vec3 reflect(const vec3 &v, const vec3 &normal){
+    return v + 2 * dot(-v, normal) * normal;
+    // add 2x the projection of -v onto the normal to get the reflected ray
+    // equivalent to rotating however 2x incidence angle clockwise about point of intersection of ray
 }
 
 #endif //VECTOR_H

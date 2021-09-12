@@ -2,6 +2,8 @@
 
 #include "helper.h"
 
+#include "material.h"
+
 #include "colour.h"
 #include "sphere.h"
 #include "hittable_list.h"
@@ -13,27 +15,17 @@
 
 colour ray_col(const ray& r, const hittable &world, int depth){ // world could be a shape, or hittable_list, since abstract class
     if(depth <= 0)
-        return colour(0, 0, 0);
+        return { 0, 0, 0 };
 
     hit_record rec;
     if(world.hit(r, 0.01, infinity, rec)){
+        ray scattered{};
+        colour attenuation{};
 
-#if defined(COS3_DISTRIBUTION_DIFFUSE)
-        point3 target = rec.normal + rec.p + random_in_unit_sphere();
-        // target point to simulate diffuse ray bounces, has a cos(phi) distribution, bit of a hack, works well
-        // enough though
-#elif defined(COS_LAMBERT_DISTRIBUTION_DIFFUSE)
-        point3 target = rec.normal + rec.p + random_in_unit_sphere();
-        // target point to simulate diffuse ray bounces, is the proper way to do diffuse materials, using the
-        // Lambert distribution
-#else // by default uses HEMISPHERE_DIFFUSE
-        point3 target = rec.p + random_in_hemisphere(rec.normal);
-        // target point to simulate diffuse ray bounces, this method is basically that it bounces in the hemisphere,
-        // away from the material (is the simplest approach)
-#endif
+        if(rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+            return attenuation * ray_col(scattered, world, depth-1); // attenuates the returning colour
 
-        ray bounced_ray( rec.p, target - rec.p ); // reflected ray from point on sphere, bounced randomly
-        return 0.5 * ray_col(bounced_ray, world, depth - 1); // get the colour from the bounced ray
+        return { 0, 0, 0 };
     }
 
     vec3 unit_dir = unit_vector(r.direction());
@@ -44,19 +36,27 @@ colour ray_col(const ray& r, const hittable &world, int depth){ // world could b
 int main(){
 
     // setup
-    constexpr int max_depth = 5;
+    constexpr int max_depth = 7;
     constexpr auto aspect_ratio = 16.0 / 9.0;
-    const int width = 1900;
+    const int width = 400;
     const int height = static_cast<int>( width / aspect_ratio);
 
     // camera
     camera cam{aspect_ratio};
-    constexpr int samples_per_pixel = 7;
+    constexpr int samples_per_pixel = 50;
+
+    // materials
+    auto material_world = make_shared<lambertian>(colour{0.8, 0.8, 0.0});
+    auto material_center_sphere = make_shared<lambertian>(colour{0.7, 0.3, 0.3});
+    auto material_left_sphere = make_shared<metal>(colour{0.8,0.8,0.8});
+    auto material_right_sphere = make_shared<metal>(colour{0.8,0.6,0.2});
 
     // setup hittable world
     hittable_list world{}; // when we pass it to ray_col it is cast to its public base - hittable
-    world.add(make_shared<sphere>(point3{ 0, 0, -1},0.5));
-    world.add(make_shared<sphere>(point3{ 0, -100.5, -1},100));
+    world.add(make_shared<sphere>(point3{ 0, -100.5, -1},100, material_world));
+    world.add(make_shared<sphere>(point3{ 0, 0, -1}, 0.5, material_center_sphere));
+    world.add(make_shared<sphere>(point3{ -1, 0, -1}, 0.5, material_left_sphere));
+    world.add(make_shared<sphere>(point3{ 1, 0, -1}, 0.5, material_right_sphere));
 
     // render
     std::cout << "P3\n" << width << " " << height << "\n255\n";
