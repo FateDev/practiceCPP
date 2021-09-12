@@ -1,31 +1,17 @@
 #include <iostream>
 
-#include "ray.h"
+#include "helper.h"
+
 #include "colour.h"
-#include "vector.h"
+#include "sphere.h"
+#include "hittable_list.h"
 
-double hit_sphere(const vec3 &sphere_center, double radius, const ray &r){
-    vec3 dist_sphere_center_ray_origin = r.origin() - sphere_center;
-    double a = r.direction().length_squared();
-    double b = 2 * dot(r.direction(), dist_sphere_center_ray_origin);
-    double c = dist_sphere_center_ray_origin.length_squared() - radius*radius;
-
-    double discriminant = b*b - 4*a*c;
-
-    if(discriminant < 0) return -1;
-    return (-b - sqrt(discriminant)) / (2*a);
-}
-
-colour ray_col(const ray& r){
-    vec3 sphere_center{0, 0, -1};
-    double s = hit_sphere(sphere_center, 0.5, r);
-    if(s > 0){
-        vec3 normal = unit_vector(r.at(s) - sphere_center);
-        return 0.5 * colour{ normal.x()+1, normal.y()+1, normal.z()+1 };
-    }
+colour ray_col(const ray& r, const hittable &world){ // world could be a shape, or hittable_list, since abstract class
+    hit_record rec;
+    if(world.hit(r, 0, infinity, rec))
+        return 0.5 * (rec.normal + colour(1,1,1));
 
     vec3 unit_dir = unit_vector(r.direction());
-
     double t = 0.5 * (unit_dir.y() + 1.0); // to be in the range 0 < x < 1
     return (1 - t)*colour(1, 1, 1) + (t)*colour(0.5, 0.7, 1.0);
 }
@@ -35,6 +21,11 @@ int main(){
     constexpr auto aspect_ratio = 16.0 / 9.0;
     const int width = 500;
     const int height = static_cast<int>( width / aspect_ratio);
+
+    // setup hittable world
+    hittable_list world{}; // when we pass it to ray_col it is cast to its public base - hittable
+    world.add(make_shared<sphere>(point3{ 0, 0, -1},0.5));
+    world.add(make_shared<sphere>(point3{ 0, -100.5, -1},100));
 
     // camera
     constexpr auto viewport_height = 2.0;
@@ -64,7 +55,7 @@ int main(){
             // the direction of the lower left corner, and the `- origin` bit is for the case when origin is not
             // at (0, 0, 0), so that the direction vector doesn't have any random offset
             ray r{ origin, lower_left_corner + u*horizontal + v*vertical - origin };
-            colour pix_col = ray_col(r);
+            colour pix_col = ray_col(r, world);
             write_colour(std::cout, pix_col);
         }
     }
