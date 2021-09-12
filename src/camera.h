@@ -11,7 +11,7 @@ public:
         auto viewport_width = aspect_ratio * viewport_height;
         auto focal_length = 1.0; // dist between 'eye' and virtual screen
 
-        origin = {0, 0, 0};
+        origin = {0, 0, 1.2};
 
         horizontal = {viewport_width, 0, 0};
         vertical = {0, viewport_height, 0};
