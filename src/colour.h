@@ -4,15 +4,11 @@
 #include "vector.h"
 
 void write_colour(std::ostream &out, colour pix_col, int samples_per_pixel){
-    auto r = pix_col.x();
-    auto g = pix_col.y();
-    auto b = pix_col.z();
-
-    // divide colours by the number or samples
+    // divide colours by the number or samples, and sqrt it for gamma correction ( col^(1/gamma) - gamma 2)
     auto scale = 1.0 / samples_per_pixel;
-    r *= scale;
-    g *= scale;
-    b *= scale;
+    auto r = sqrt(pix_col.x() * scale);
+    auto g = sqrt(pix_col.y() * scale);
+    auto b = sqrt(pix_col.z() * scale);
 
     // write colors
     out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '

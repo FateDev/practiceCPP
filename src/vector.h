@@ -51,6 +51,14 @@ public:
     double length() const {
         return sqrt(length_squared());
     }
+
+    inline static vec3 random(){
+        return { random_double(), random_double(), random_double() };
+    }
+
+    inline static vec3 random(double min, double max){
+        return { random_double(min, max), random_double(min, max), random_double(min, max) };
+    }
 };
 
 inline std::ostream &operator<<(std::ostream &out, const vec3 &u){
@@ -91,6 +99,31 @@ inline vec3 cross(const vec3 &u, const vec3 &v){
 
 inline vec3 unit_vector(const vec3 &u){
     return u/u.length();
+}
+
+inline vec3 random_in_unit_sphere(){
+    // this has a distribution scaled by cos^3(phi), not Lambertian reflectance
+    while(true){
+        auto point = vec3::random(-1, 1);
+        if(point.length_squared() >= 1) continue;
+        return point;
+    }
+}
+
+inline vec3 random_unit_vector(){
+    return unit_vector(vec3::random(-1, 1));
+    // normalising, rather than picking points over and over until you pick a point in a unit sphere
+    // yields Lambertian reflection, using the Lambertian distribution (random distribution scaled by cos(phi),
+    // rather than by cos^3(phi) )
+}
+
+inline vec3 random_in_hemisphere(const vec3 &normal){
+    vec3 point_in_unit_sphere = random_in_unit_sphere();
+    if(dot(normal, point_in_unit_sphere) > 0){
+        return point_in_unit_sphere;
+    }else{
+        return -point_in_unit_sphere;
+    }
 }
 
 #endif //VECTOR_H
