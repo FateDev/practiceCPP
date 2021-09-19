@@ -142,4 +142,30 @@ inline vec3 reflect(const vec3 &v, const vec3 &normal){
     // equivalent to rotating however 2x incidence angle clockwise about point of intersection of ray
 }
 
+inline vec3 refract(const vec3 &uv, const vec3 &n, double eta_i_over_eta_t){
+    // https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
+    // perp/parallel to the normal, magnitude of all vectors is 1
+    // diagram used for the derivation is the same as in the pdf linked above
+    // n_1 * sin(theta_i) = n_2 * sin(theta_r)
+    // sin(theta_i)=|r_incident_perp|/|r_incident|, and sin(theta_r)=|r_out_perp|/|r_out|
+    // so |r_out_perp|=n1/n2*|r_incident_perp|
+    // and since r_out_perp and r_incident_perp are parallel and in the same direction:
+    // --> r_out_perp = n1/n2*r_incident_perp
+    // r_incident_perp = r_incident - dot(-r_incident, normal) * ( -normal ) - to get the bit perpendicular to the normal
+    // so r_incident_perp = r_incident + cos(theta_i)*normal
+    // so r_out_perp = n1/n2*(r_incident + cos(theta_i)*normal)
+    auto cos_theta_i = fmin(dot(-uv, n), 1.0); // uv and normal are in opposite directions, so incident angle is with -uv
+    vec3 r_out_perp = eta_i_over_eta_t * (uv + cos_theta_i*n); // perpendicular component of refracted ray
+    // |r_out|^2 = |r_out_perp|^2 + |r_out_parallel|^2
+    // 1 = |r_out_perp|^2 + |r_out_parallel|^2
+    // |r_out_parallel|^2 = 1 - |r_out_perp|^2
+    // |r_out_parallel| = -sqrt(1 - |r_out_perp|^2) - negative since in the diagram it can be though as pointing down
+    // normal*|r_out_parallel| = -sqrt(1 - |r_out_perp|^2)*normal
+    // r_out_parallel = -sqrt(1 - |r_out_perp|^2)*normal
+    // --> since the normal was of magnitude 1 and parallel to r_out_parallel, multiplying the magnitude of
+    //     r_out_parallel by it, simply made it into the r_out_parallel vector
+    vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+    return r_out_perp + r_out_parallel; // the final refracted ray
+}
+
 #endif //VECTOR_H

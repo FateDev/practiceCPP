@@ -9,10 +9,6 @@
 #include "hittable_list.h"
 #include "camera.h"
 
-//#define COS3_DISTRIBUTION_DIFFUSE
-//#define COS_LAMBERT_DISTRIBUTION_DIFFUSE
-#define HEMISPHERE_DIFFUSE
-
 colour ray_col(const ray& r, const hittable &world, int depth){ // world could be a shape, or hittable_list, since abstract class
     if(depth <= 0)
         return { 0, 0, 0 };
@@ -36,27 +32,28 @@ colour ray_col(const ray& r, const hittable &world, int depth){ // world could b
 int main(){
 
     // setup
-    constexpr int max_depth = 10;
+    constexpr int max_depth = 20;
     constexpr auto aspect_ratio = 16.0 / 9.0;
-    const int width = 1500;
+    const int width = 1400;
     const int height = static_cast<int>( width / aspect_ratio);
 
     // camera
-    camera cam{aspect_ratio};
-    constexpr int samples_per_pixel = 60;
+    camera cam({ -2, 2, 1}, { 0, 0, -1 }, { 0, 1, 0}, aspect_ratio, 20);
+    constexpr int samples_per_pixel = 30;
 
     // materials
     auto material_world = make_shared<lambertian>(colour{0.15294, 0.68235, 0.37647});
-    auto material_center_sphere = make_shared<lambertian>(colour{0.20392, 0.28627, 0.36863});
+    auto material_center_sphere = make_shared<dielectric>( 1.5);
     auto material_left_sphere = make_shared<metal>(colour{0.90588, 0.29804, 0.23529}, 0.5);
-    auto material_right_sphere = make_shared<metal>(colour{0.60784, 0.34902, 0.71373}, 0.01);
+    auto material_right_sphere = make_shared<metal>(colour{0.60784, 0.34902, 0.71373}, 0.2);
 
     // setup hittable world
     hittable_list world{}; // when we pass it to ray_col it is cast to its public base - hittable
     world.add(make_shared<sphere>(point3{ 0, -100.5, -1},100, material_world));
     world.add(make_shared<sphere>(point3{ 0, 0, -1}, 0.5, material_center_sphere));
-    world.add(make_shared<sphere>(point3{ -1.2, 0, -1}, 0.5, material_left_sphere));
-    world.add(make_shared<sphere>(point3{ 1.2, 0, -1}, 0.5, material_right_sphere));
+    world.add(make_shared<sphere>(point3{ 0, 0, -1}, -0.4, material_center_sphere));
+    world.add(make_shared<sphere>(point3{ -1, 0, -1}, 0.5, material_left_sphere));
+    world.add(make_shared<sphere>(point3{ 1, 0, -1}, 0.5, material_right_sphere));
 
     // render
     std::cout << "P3\n" << width << " " << height << "\n255\n";

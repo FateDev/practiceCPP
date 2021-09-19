@@ -49,4 +49,44 @@ public:
     double fuzz{};
 };
 
+class dielectric : public material {
+public:
+    dielectric(double index_of_refraction) : ir(index_of_refraction) {}
+
+    bool scatter(const ray &r_incident, const hit_record &rec, colour &attenuation, ray &scattered) const override {
+        attenuation = colour(1.0, 1.0, 1.0);
+        double refraction_ratio = rec.front_face ? (1.0/ir) : ir; // depending on if coming into/out of material
+
+        vec3 unit_dir = unit_vector(r_incident.direction()); // the refract function requires normalised vectors
+
+        double cos_theta_i = dot(-unit_dir, rec.normal); // gets angle between ray and normal
+        // if n1/n2 * sin(theta_i) > 1 then total internal reflection
+        // or n1/n2 * sqrt(1-cos(theta_i)^2) > 1
+        // or sqrt((n1/n2)^2 * (1-cos(theta_i)^2)) > 1
+        // or (n1/n2)^2 * (1-cos(theta_i)^2) > 1 (which is what I've done below - avoids the square root)
+        bool cannot_refract = refraction_ratio*refraction_ratio*(1-cos_theta_i*cos_theta_i) > 1;
+
+        vec3 direction_out;
+        if(cannot_refract || reflectance(cos_theta_i, refraction_ratio) > random_double())
+            direction_out = reflect(unit_dir, rec.normal);
+        else
+            direction_out = refract(unit_dir, rec.normal, refraction_ratio);
+
+        scattered = ray(rec.p, direction_out); // scattered ray from the point of intersection, in the refracted direction
+        return true;
+    }
+public:
+    double ir{};
+private:
+    static double reflectance(double cosine, double ref_idx) {
+        // this returns the reflection coefficient, which describes how much of a wave is reflected,
+        // so we can use it as 'probability of reflection' when rendering,
+        // and it becomes the ratio of the overall light reflected
+        // this is Schlick's approximation for reflectance
+        auto r0 = (1-ref_idx) / (1+ref_idx);
+        r0 *= r0;
+        return r0 + (1-r0)*pow((1-cosine), 5);
+    }
+};
+
 #endif // MATERIAL_H
