@@ -13,8 +13,9 @@ struct hit_record {
     bool front_face{};
     vec3 normal{}; // normal at hit
     inline void set_face_normal(const ray &r, const vec3 &outward_normal){
-        front_face = dot(r.direction(), outward_normal) > 0.0; // if ray coming from inside, then positive
-        normal = front_face ? -outward_normal : outward_normal; // if from inside, then normal is -outward_normal
+        front_face = dot(r.direction(), outward_normal) < 0.0; // used to determine the refraction ratio
+        // if ray coming from outside, then the normal and ray point in different directions
+        normal = front_face ? outward_normal : -outward_normal; // if from inside, then normal is -outward_normal
     }
 };
 

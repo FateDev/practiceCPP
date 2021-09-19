@@ -32,28 +32,45 @@ colour ray_col(const ray& r, const hittable &world, int depth){ // world could b
 int main(){
 
     // setup
-    constexpr int max_depth = 20;
+    constexpr int max_depth = 50;
     constexpr auto aspect_ratio = 16.0 / 9.0;
-    const int width = 1400;
+    const int width = 1920;
     const int height = static_cast<int>( width / aspect_ratio);
 
     // camera
-    camera cam({ -2, 2, 1}, { 0, 0, -1 }, { 0, 1, 0}, aspect_ratio, 20);
-    constexpr int samples_per_pixel = 30;
+    const point3 look_from(5,10,10);
+    const point3 look_at(0,0,-1);
+    const vec3 v_up(0,1,0);
+    auto dist_to_focus = (look_from-look_at).length();
+    auto aperture = 0.7;
+    camera cam(look_from, look_at, v_up, aspect_ratio, 20, aperture, dist_to_focus);
+
+    constexpr int samples_per_pixel = 50;
 
     // materials
-    auto material_world = make_shared<lambertian>(colour{0.15294, 0.68235, 0.37647});
+    auto material_world = make_shared<lambertian>(colour{0.15294 * random_double(), 0.68235 * random_double(), 0.37647 * random_double()});
     auto material_center_sphere = make_shared<dielectric>( 1.5);
-    auto material_left_sphere = make_shared<metal>(colour{0.90588, 0.29804, 0.23529}, 0.5);
-    auto material_right_sphere = make_shared<metal>(colour{0.60784, 0.34902, 0.71373}, 0.2);
+    auto material_left_sphere = make_shared<metal>(colour{0.90588 * random_double(), 0.29804 * random_double(), 0.23529 * random_double()}, 0.5);
+    auto material_right_sphere = make_shared<metal>(colour{0.60784 * random_double(), 0.34902 * random_double(), 0.71373 * random_double()}, 0.2);
 
     // setup hittable world
     hittable_list world{}; // when we pass it to ray_col it is cast to its public base - hittable
     world.add(make_shared<sphere>(point3{ 0, -100.5, -1},100, material_world));
-    world.add(make_shared<sphere>(point3{ 0, 0, -1}, 0.5, material_center_sphere));
-    world.add(make_shared<sphere>(point3{ 0, 0, -1}, -0.4, material_center_sphere));
-    world.add(make_shared<sphere>(point3{ -1, 0, -1}, 0.5, material_left_sphere));
-    world.add(make_shared<sphere>(point3{ 1, 0, -1}, 0.5, material_right_sphere));
+    world.add(make_shared<sphere>(point3{ 0, 1, -1}, 1.5, material_center_sphere));
+    world.add(make_shared<sphere>(point3{ 0, 1, -1}, -1.4, material_center_sphere));
+    world.add(make_shared<sphere>(point3{ -2, 1, -1}, 0.5, material_left_sphere));
+    world.add(make_shared<sphere>(point3{ 2, 1, -1}, 0.5, material_right_sphere));
+
+    for(int i = -5; i < 5; i++){
+        for(int j = -5; j < 5; j++){
+            auto material_random_sphere = make_shared<metal>(colour{0.60784 * random_double(), 0.34902 * random_double(), 0.71373 * random_double()}, 0.2*random_double());
+            world.add(make_shared<sphere>(
+                    point3{ 1+static_cast<double>(i)* random_double()*0.9+0.1, random_double()*0.9+0.1, -1+static_cast<double>(j)* random_double()*0.9+0.1},
+                    0.1 * random_double()*0.9+0.1,
+                    material_random_sphere)
+            );
+        }
+    }
 
     // render
     std::cout << "P3\n" << width << " " << height << "\n255\n";

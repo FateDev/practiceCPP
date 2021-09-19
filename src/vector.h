@@ -168,4 +168,12 @@ inline vec3 refract(const vec3 &uv, const vec3 &n, double eta_i_over_eta_t){
     return r_out_perp + r_out_parallel; // the final refracted ray
 }
 
+inline vec3 random_in_unit_disk() {
+    while(true) {
+        auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0); // disk at z = 0
+        if(p.length_squared() >= 1) continue; // must be in the unit sphere
+        return p;
+    }
+}
+
 #endif //VECTOR_H
