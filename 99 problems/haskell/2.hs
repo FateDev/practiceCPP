@@ -5,10 +5,6 @@ secondLastElement :: [Int] -> Int
 secondLastElement = head . tail . reverse
 
 secondLastElement2 :: [Int] -> Int
-secondLastElement2 list
-  = reverse list !! 1
+secondLastElement2 list = reverse list !! 1
 
-main = print(
-  secondLastElement [1, 2, 3, 4],
-  secondLastElement2 [1, 2, 3, 4]
-  )
+main = print (secondLastElement [1, 2, 3, 4], secondLastElement2 [1, 2, 3, 4])
