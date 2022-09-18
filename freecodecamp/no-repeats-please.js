@@ -1,34 +1,53 @@
 function rotations(str) {
-  const original_len = str.length;
+  const originalLen = str.length;
   str = (str+str).split("")
   const out = []
-  for(let i = 0; i < original_len; i++) {
-    out.push(str.slice(i, i+original_len).join(""))
+  for(let i = 0; i < originalLen; i++) {
+    out.push(str.slice(i, i+originalLen).join(""))
   }
   return out;
 }
 
 function permAlone(str) {
   const str_dict = {};
-  function permSubstrings(sub_str) {
-		if(sub_str.length == 1) {
-      return sub_str;
+  let cache_hits = 0;
+  let cache_miss = 0;
+  function permSubstrings(firstLetter, subStr) {
+		if(subStr.length == 1) {
+      let retPerms = 0;
+      if(firstLetter != subStr) {
+        retPerms = 1;
+      }
+      str_dict[firstLetter + subStr] = retPerms
+      return retPerms;
     }
 
-    const outs = [];
-		const rots = rotations(sub_str);
+    let validPerms = 0;
+		const rots = rotations(subStr);
     for(const rot of rots) {
-      const perms = permSubstrings(rot.slice(1))
-      for(const p of perms) {
-        if(p[0] != rot[0])
-        	outs.push(rot[0] + p);
+      if(rot[0] == firstLetter) {
+        continue;
       }
+      
+      if(str_dict[rot] !== undefined) {
+        cache_hits++;
+        validPerms += str_dict[rot];
+        continue;
+      }
+        cache_miss++;
+      
+      const perms = permSubstrings(rot[0], rot.slice(1))
+      validPerms += perms;
+      
+      str_dict[rot] = perms;
     }
     
-    return outs;
+    return validPerms;
   }
+  const ps = permSubstrings("", str);
   
-  return permSubstrings(str).length;
+  console.log(`cache hits: ${cache_hits}, cache misses: ${cache_miss}`)
+  return ps;
 }
 
-permAlone('aabb');
+permAlone('abcdefa');
