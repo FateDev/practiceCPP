@@ -10,8 +10,6 @@ function rotations(str) {
 
 function permAlone(str) {
   const str_dict = {};
-  let cache_hits = 0;
-  let cache_miss = 0;
   function permSubstrings(firstLetter, subStr) {
 		if(subStr.length == 1) {
       let retPerms = 0;
@@ -30,11 +28,9 @@ function permAlone(str) {
       }
       
       if(str_dict[rot] !== undefined) {
-        cache_hits++;
         validPerms += str_dict[rot];
         continue;
       }
-        cache_miss++;
       
       const perms = permSubstrings(rot[0], rot.slice(1))
       validPerms += perms;
@@ -44,10 +40,8 @@ function permAlone(str) {
     
     return validPerms;
   }
-  const ps = permSubstrings("", str);
   
-  console.log(`cache hits: ${cache_hits}, cache misses: ${cache_miss}`)
-  return ps;
+  return permSubstrings("", str);
 }
 
 permAlone('abcdefa');
