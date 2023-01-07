@@ -8,7 +8,7 @@ function fixHeap(arr, node, minHeap) {
 
     // use this to switch between building a min or max heap
     const maxSubHeapComparison = (a, b) => a < b;
-    const minSubHeapComparison = (a, b) => a >= b;
+    const minSubHeapComparison = (a, b) => a > b;
     const correctComparison = minHeap ? minSubHeapComparison : maxSubHeapComparison;
 
     // get the correct subheap
