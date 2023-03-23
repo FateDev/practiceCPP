@@ -14,14 +14,15 @@ void log_helper_function(std::string msg, bool cerr_or_not);
 void fatal_error(std::string error_message);
 }; // namespace utility
 
-#define VERBOSE_DEBUG
+#define STREAM_ITEM(X) " ### " << #X << ": " << X <<
+
 // helper for printing longer messages for a fatal error
 #define FATAL_ERROR(...) utility_printing_helper::fatal_error(static_cast<std::ostringstream&&>(std::ostringstream{} << __VA_ARGS__).str())
+#define FATAL_ERROR_VARS(...) utility_printing_helper::fatal_error(static_cast<std::ostringstream&&>(std::ostringstream{} << FOREACH(STREAM_ITEM, (__VA_ARGS__)) "").str())
 
 #ifdef VERBOSE_DEBUG
 // helper for printing out variables with their names
-#define COUT_ITEM(X) " ### " << #X << ": " << X <<
-#define PRINT_DEBUG_VARS(...) std::cout << FOREACH(COUT_ITEM, (__VA_ARGS__)) std::endl
+#define PRINT_DEBUG_VARS(...) std::cout << FOREACH(STREAM_ITEM, (__VA_ARGS__)) std::endl
 
 // helper for using cout
 #define PRINT_DEBUG(...) std::cout << __VA_ARGS__ << std::endl
