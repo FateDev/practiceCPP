@@ -1,0 +1,1 @@
+Useful stuff I may use in a C++ project
