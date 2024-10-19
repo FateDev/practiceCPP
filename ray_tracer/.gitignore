@@ -1,0 +1,5 @@
+build/
+**/.idea/
+commands.md
+.DS_Store
+test.ppm
