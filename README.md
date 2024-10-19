@@ -2,6 +2,7 @@
 A bunch of practice activities and small projects.
 
 Some experiments which I thought were cool:
+- [WASM Opus Decoder](./mini_projects/wasm_opus_decoder/)
 - [Ray Tracer](./mini_projects/ray_tracer/)
 - [Quaternions](./mini_projects/quaternions%20and%20vectors/)
 - [C++ Server](./mini_projects/cpp_server/)
