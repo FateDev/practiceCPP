@@ -1,2 +1,4 @@
 **/.secret
 .vscode
+
+__pycache__
