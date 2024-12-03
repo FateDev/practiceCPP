@@ -5,27 +5,28 @@ from typing_extensions import override
 from common.utils import load_aoc_data
 from common.Solution import Solution
 
-MUL_REGEX = r"mul\((\d+),(\d+)\)"
-DO_REGEX = r"do(n't)?\(\)"
+MUL_REGEX = re.compile(r"mul\((\d+),(\d+)\)")
+DO_REGEX = re.compile(r"do(n't)?\(\)")
 
 class Conditional(Enum):
-    DO_NEXT = 0
-    DONT_NEXT = 1
+    NOT_FOUND = 0
+    DO_NEXT = 1
+    DONT_NEXT = 2
 
-def find_conditional(data: str, idx: int):
+def find_conditional(data: str, idx: int) -> tuple[Conditional, int]:
     try:
         item = next(re.finditer(DO_REGEX, data[idx:]))
         return Conditional.DO_NEXT if not item.group(1) else Conditional.DONT_NEXT, \
                item.end() + idx
     except StopIteration:
-        return None
+        return Conditional.NOT_FOUND, len(data)
 
-def find_mul(data: str, idx: int):
+def find_mul(data: str, idx: int) -> tuple[tuple[int, int], int]:
     try:
         item = next(re.finditer(MUL_REGEX, data[idx:]))
         return (int(item.group(1)), int(item.group(2))), item.end() + idx
     except StopIteration:
-        return None
+        return (0, 0), len(data)
 
 class Day3(Solution):
     @override
@@ -35,11 +36,7 @@ class Day3(Solution):
     @override
     def part1(self, data: str) -> int:
         muls: list[tuple[str, str]] = re.findall(MUL_REGEX, data)
-        ans = sum([
-            int(mul[0]) * int(mul[1])
-            for mul in muls
-        ])
-        return ans
+        return sum(int(n1) * int(n2) for n1, n2 in muls)
 
     @override
     def part2(self, data: str):
@@ -56,26 +53,17 @@ class Day3(Solution):
         cond = next_cond(idx)
         mul = next_mul(idx)
 
-        while mul:
-            if cond:
-                (n1, n2), idx_mul = mul
-                skip_cond, idx_cond = cond
+        while idx < len(data):
+            (n1, n2), idx_mul = mul
+            skip_cond, idx_cond = cond
 
-                if idx_mul < idx_cond:
-                    if skip == Conditional.DO_NEXT:
-                        total += n1 * n2
-                    idx = idx_mul
-                    mul = next_mul(idx)
-                else:
-                    skip = skip_cond
-                    idx = idx_cond
-                    cond = next_cond(idx)
+            if skip_cond != Conditional.NOT_FOUND and idx_cond <= idx_mul:
+                skip = skip_cond
+                idx = idx_cond
+                cond = next_cond(idx)
             else:
-                (n1, n2), idx_mul = mul
-
                 if skip == Conditional.DO_NEXT:
-                    total += n1 * n2
-                
+                    total += n1 * n2                
                 idx = idx_mul
                 mul = next_mul(idx)
         
