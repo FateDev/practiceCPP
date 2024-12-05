@@ -7,18 +7,22 @@ from common.Solution import Solution
 MUL_REGEX = re.compile(r"mul\((\d+),(\d+)\)")
 DO_REGEX = re.compile(r"do(n't)?\(\)")
 
+
 class Conditional(Enum):
     NOT_FOUND = 0
     DO_NEXT = 1
     DONT_NEXT = 2
 
+
 def find_conditional(data: str, idx: int) -> tuple[Conditional, int]:
     try:
         item = next(re.finditer(DO_REGEX, data[idx:]))
-        return Conditional.DO_NEXT if not item.group(1) else Conditional.DONT_NEXT, \
-               item.end() + idx
+        return Conditional.DO_NEXT if not item.group(
+            1
+        ) else Conditional.DONT_NEXT, item.end() + idx
     except StopIteration:
         return Conditional.NOT_FOUND, len(data)
+
 
 def find_mul(data: str, idx: int) -> tuple[tuple[int, int], int]:
     try:
@@ -26,6 +30,7 @@ def find_mul(data: str, idx: int) -> tuple[tuple[int, int], int]:
         return (int(item.group(1)), int(item.group(2))), item.end() + idx
     except StopIteration:
         return (0, 0), len(data)
+
 
 class Day3(Solution):
     @override
@@ -41,7 +46,7 @@ class Day3(Solution):
 
         def next_cond(idx: int):
             return find_conditional(data, idx)
-        
+
         def next_mul(idx: int):
             return find_mul(data, idx)
 
@@ -58,14 +63,15 @@ class Day3(Solution):
                 cond = next_cond(idx)
             else:
                 if skip == Conditional.DO_NEXT:
-                    total += n1 * n2                
+                    total += n1 * n2
                 idx = idx_mul
                 mul = next_mul(idx)
-        
+
         return total
 
     def __init__(self, filename: str):
         super().__init__(filename)
+
 
 Day3("day3_example.txt").run()
 Day3("day3.txt").run()
