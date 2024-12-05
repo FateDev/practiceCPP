@@ -2,7 +2,6 @@ import re
 from enum import Enum
 from typing_extensions import override
 
-from common.utils import load_aoc_data
 from common.Solution import Solution
 
 MUL_REGEX = re.compile(r"mul\((\d+),(\d+)\)")
@@ -29,10 +28,6 @@ def find_mul(data: str, idx: int) -> tuple[tuple[int, int], int]:
         return (0, 0), len(data)
 
 class Day3(Solution):
-    @override
-    def preprocess(self, filename: str):
-        return load_aoc_data(filename)
-
     @override
     def part1(self, data: str) -> int:
         muls: list[tuple[str, str]] = re.findall(MUL_REGEX, data)
